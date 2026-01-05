@@ -8,11 +8,12 @@ in the `downloads` folder.
 """
 
 import os
+import zipfile
 from garmy import APIClient, AuthClient
 from dotenv import load_dotenv
 
 def main():
-    """Check for downloaded cycling activity files."""
+    """Check for downloaded cycling activity files and unzip if found."""
     print("🚴‍♂️ Garmin Cycling Activities Checker")
     print("=" * 40)
 
@@ -57,8 +58,17 @@ def main():
 
         print(f"\n📈 Found {len(cycling_activities)} recent cycling activities:")
         print("=" * 80)
+        
+        # throw an error if DOWNLOADS_FOLDER is not set
+        downloads_folder = os.getenv("DOWNLOADS_FOLDER")
+        if not downloads_folder:
+            raise ValueError("DOWNLOADS_FOLDER environment variable is not set.")
+        
+        # throw an error if EXTRACT_FOLDER is not set
+        extract_folder = os.getenv("EXTRACT_FOLDER")
+        if not extract_folder:
+            raise ValueError("EXTRACT_FOLDER environment variable is not set.")
 
-        downloads_folder = r"C:\\Users\\me\\Downloads"
         for i, activity in enumerate(cycling_activities, 1):
             name = activity.activity_name or f"Cycling_Activity_{i}"
             activity_id = activity.activity_id
@@ -66,6 +76,12 @@ def main():
 
             if os.path.exists(file_path):
                 print(f"{i:2d}. {name} (ID: {activity_id}) - ✅ File found: {file_path}")
+                try:
+                    with zipfile.ZipFile(file_path, 'r') as zip_ref:
+                        zip_ref.extractall(extract_folder)
+                    print(f"    Extracted contents to: {extract_folder}")
+                except Exception as e:
+                    print(f"    ❌ Failed to extract {file_path}: {e}")
             else:
                 print(f"{i:2d}. {name} (ID: {activity_id}) - ❌ File not found")
 
