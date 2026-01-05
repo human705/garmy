@@ -69,13 +69,24 @@ def main():
         if not extract_folder:
             raise ValueError("EXTRACT_FOLDER environment variable is not set.")
 
+        activity_details = []  # List to store activity data and time
+
         for i, activity in enumerate(cycling_activities, 1):
             name = activity.activity_name or f"Cycling_Activity_{i}"
             activity_id = activity.activity_id
+            activity_time = activity.start_time_local
             file_path = os.path.join(downloads_folder, f"{activity_id}.zip")
 
+            # Append activity data and time to the list
+            activity_details.append({
+                "name": name,
+                "id": activity_id,
+                "time": activity_time,
+                "file_found": os.path.exists(file_path)
+            })
+
             if os.path.exists(file_path):
-                print(f"{i:2d}. {name} (ID: {activity_id}) - ✅ File found: {file_path}")
+                print(f"{i:2d}. {name} (ID: {activity_id}), Time: {activity_time} - ✅ File found: {file_path}")
                 try:
                     with zipfile.ZipFile(file_path, 'r') as zip_ref:
                         zip_ref.extractall(extract_folder)
