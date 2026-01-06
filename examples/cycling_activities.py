@@ -86,13 +86,46 @@ def main():
             })
 
             if os.path.exists(file_path):
-                print(f"{i:2d}. {name} (ID: {activity_id}), Time: {activity_time} - ✅ File found: {file_path}")
+                print(f"{i:2d}. {name} (ID: {activity_id}) - ✅ File found: {file_path}")
                 try:
                     with zipfile.ZipFile(file_path, 'r') as zip_ref:
                         zip_ref.extractall(extract_folder)
+
+                        # Rename extracted files
+                        extracted_file_path = os.path.join(extract_folder, f"{activity_id}_ACTIVITY.fit")
+                        if os.path.exists(extracted_file_path):
+                            # Get the first 10 characters for the activity.time
+                            d = activity_time[:10]
+                            activity_date_formatted = d.replace("-", "").strip()
+                            print(f"    Activity date: {activity_date_formatted}")
+                            t = activity_time[11:19]
+                            activity_time_formatted = t.replace(":", "").strip()
+                            print(f"    Activity time: {activity_time_formatted}")
+                            date_time = activity_time.replace("T", "-").replace(":", "")
+                            # The data_time field should be in the format YYYYMMDD-HHMMSS
+                            activity_date_time = f"{activity_date_formatted}-{activity_time_formatted}"
+                            print(f"    Activity date_time: {activity_date_time}")
+                            sanitized_name = name.replace(" ", "_")
+                            # Remove any slashes, backslashes, or | characters from the name
+                            sanitized_name = sanitized_name.replace("/", "").replace("\\", "").replace("|", "")
+                            new_file_name = f"{activity_date_time}-activity_{activity_id}_{sanitized_name}.fit"
+                            new_file_path = os.path.join(extract_folder, new_file_name)
+                            os.rename(extracted_file_path, new_file_path)
+                            print(f"    Renamed: {extracted_file_path} -> {new_file_path}")
+
                     print(f"    Extracted contents to: {extract_folder}")
+
+                    # for extracted_file in os.listdir(extract_folder):
+                    #     if extracted_file.endswith(".fit"):
+                    #         old_file_path = os.path.join(extract_folder, extracted_file)
+                    #         date_time = activity_time.replace("T", "-").replace(":", "")
+                    #         sanitized_name = name.replace(" ", "_")
+                    #         new_file_name = f"{date_time}-activity_{activity_id}_{sanitized_name}.fit"
+                    #         new_file_path = os.path.join(extract_folder, new_file_name)
+                    #         os.rename(old_file_path, new_file_path)
+                    #         print(f"    Renamed: {old_file_path} -> {new_file_path}")
                 except Exception as e:
-                    print(f"    ❌ Failed to extract {file_path}: {e}")
+                    print(f"    ❌ Failed to extract or rename files for {file_path}: {e}")
             else:
                 print(f"{i:2d}. {name} (ID: {activity_id}) - ❌ File not found")
 
