@@ -11,11 +11,23 @@ import os
 import zipfile
 from garmy import APIClient, AuthClient
 from dotenv import load_dotenv
+import argparse
 
 def main():
     """Check for downloaded cycling activity files and unzip if found."""
     print("🚴‍♂️ Garmin Cycling Activities Checker")
     print("=" * 40)
+
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description="Fetch recent cycling activities.")
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=3,  # Default to 3 activities
+        help="Number of recent cycling activities to fetch (default: 3)"
+    )
+    args = parser.parse_args()
+    limit = args.limit
 
     # Load environment variables from .env file
     load_dotenv()
@@ -44,13 +56,13 @@ def main():
             print("❌ Activities metric not available")
             return
 
-        # Get recent cycling activities (last 10)
-        print("📊 Fetching recent cycling activities...")
+        # Get recent cycling activities
+        print(f"📊 Fetching the last {limit} cycling activities...")
         recent_cycling_activities = activities.list(limit=50)  # Fetch more to filter
         cycling_activities = [
             activity for activity in recent_cycling_activities
             # if activity.activity_type_name.lower() == "cycling"
-        ][:10]
+        ][:limit]
 
         if not cycling_activities:
             print("❌ No cycling activities found")

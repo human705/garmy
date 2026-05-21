@@ -3,7 +3,7 @@ cd C:\Users\me\miniconda3\envs\garmy
 call conda env list
 
 call conda activate garmy
-call python.exe C:\AllRepos\myGitHubRepos\garmy\examples\cycling_activities.py
+call python.exe C:\AllRepos\myGitHubRepos\garmy\examples\cycling_activities.py --limit 5
 call conda deactivate
 
 
